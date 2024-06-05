@@ -96,22 +96,24 @@ if api_key and video_id:
                         st.write(question)
                         user_answer = st.radio("Select your answer:", options, key=question, index=None)
                         st.session_state.correct_answers[question] = correct_answer
+                        st.session_state.answers[question] = user_answer
 
-                        if question not in st.session_state.answers:
-                            st.session_state.answers[question] = None
-
+                        if 'submitted' in st.session_state and st.session_state.submitted:
+                            if user_answer is None:
+                                st.warning(f'No answer selected for: {question}')
+                            else:
+                                if user_answer == correct_answer:
+                                    st.success(f'Correct! {correct_answer} is the right answer for: {question}', icon="✅")
+                                else:
+                                    st.error(f'Incorrect! The correct answer is {correct_answer} for: {question}', icon="❌")
                     except IndexError:
                         st.error(f"An error occurred while processing the question: {q}")
 
                 submit_button = st.form_submit_button(label='Submit Answers')
 
                 if submit_button:
-                    for question, correct_answer in st.session_state.correct_answers.items():
-                        user_answer = st.session_state.answers.get(question)
-                        if user_answer:
-                            if user_answer == correct_answer:
-                                st.success(f'Correct! {correct_answer} is the right answer for: {question}', icon="✅")
-                            else:
-                                st.error(f'Incorrect! The correct answer is {correct_answer} for: {question}', icon="❌")
+                    st.session_state.submitted = True
+                    st.experimental_rerun()
+
     except Exception as e:
         st.error(f'An error occurred: {e}')
