@@ -2,12 +2,30 @@ import streamlit as st
 from youtube_transcript_api import YouTubeTranscriptApi
 import requests
 import json
+import re
+from urllib.parse import urlparse, parse_qs
 
 st.title('YouTube Video Summarizer and Quiz Generator')
 st.write("We summarize the YouTube videos and generate quizzes for you so you don't have to.")
 
 api_key = st.text_input("Enter your API key", type='password')
-video_id = st.text_input('Enter the YouTube Video ID:', '')
+video_url = st.text_input('Enter the YouTube Video URL:', '')
+
+def extract_video_id(url):
+    """
+    Extracts the YouTube video ID from the given URL.
+    """
+    video_id = None
+    match = re.match(r'(https?://)?(www\.)?(youtube\.com|youtu\.?be)/.+', url)
+    if match:
+        if 'youtube.com' in url:
+            query = urlparse(url).query
+            video_id = parse_qs(query).get('v')
+            if video_id:
+                video_id = video_id[0]
+        elif 'youtu.be' in url:
+            video_id = url.split('/')[-1]
+    return video_id
 
 def generate_gpt_response(api_key, instruction, max_tokens):
     endpoint = 'https://api.openai.com/v1/chat/completions'
@@ -52,6 +70,7 @@ def generate_mcqs(api_key, full_transcript):
         4000
     )
 
+video_id = extract_video_id(video_url)
 if api_key and video_id:
     try:
         full_transcript = fetch_transcript(video_id)
@@ -117,3 +136,5 @@ if api_key and video_id:
 
     except Exception as e:
         st.error(f'An error occurred: {e}')
+else:
+    st.error("Please enter a valid YouTube video URL.")
