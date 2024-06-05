@@ -73,21 +73,43 @@ if api_key and video_id:
             st.subheader('Summary:')
             st.write(summary)
 
-        if show_mcqs:
-            mcqs = generate_mcqs(api_key, full_transcript)
+        if show_mcqs or 'mcqs' in st.session_state:
+            if show_mcqs:
+                st.session_state.mcqs = generate_mcqs(api_key, full_transcript)
+            
             st.subheader('MCQs:')
-            questions = mcqs.split('\n\n')  # Assuming each question is separated by a blank line
-            for q in questions:
-                question, *options, answer = q.split('\n')
-                correct_answer = answer.split(': ')[1].strip()
-                
-                st.write(question)
-                user_answer = st.radio(question, options)
-                
-                if st.button(f'Submit Answer for {question}'):
-                    if user_answer == correct_answer:
-                        st.success(f'Correct! {correct_answer} is the right answer.', icon="✅")
-                    else:
-                        st.error(f'Incorrect! The correct answer is {correct_answer}.', icon="❌")
+            questions = st.session_state.mcqs.split('\n\n')  # Assuming each question is separated by a blank line
+
+            if 'answers' not in st.session_state:
+                st.session_state.answers = {}
+                st.session_state.correct_answers = {}
+
+            with st.form(key='mcq_form'):
+                for q in questions:
+                    try:
+                        parts = q.split('\n')
+                        question = parts[0]
+                        options = parts[1:5]
+                        answer = parts[5]
+                        correct_answer = answer.split(': ')[1].strip()
+
+                        st.write(question)
+                        user_answer = st.radio("Select your answer:", options, key=question)
+                        st.session_state.correct_answers[question] = correct_answer
+                        st.session_state.answers[question] = user_answer
+
+                    except IndexError:
+                        st.error(f"An error occurred while processing the question: {q}")
+
+                submit_button = st.form_submit_button(label='Submit Answers')
+
+                if submit_button:
+                    for question, correct_answer in st.session_state.correct_answers.items():
+                        user_answer = st.session_state.answers.get(question, None)
+                        if user_answer:
+                            if user_answer == correct_answer:
+                                st.success(f'Correct! {correct_answer} is the right answer for: {question}', icon="✅")
+                            else:
+                                st.error(f'Incorrect! The correct answer is {correct_answer} for: {question}', icon="❌")
     except Exception as e:
         st.error(f'An error occurred: {e}')
