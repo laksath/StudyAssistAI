@@ -94,9 +94,11 @@ if api_key and video_id:
                         correct_answer = answer.split(': ')[1].strip()
 
                         st.write(question)
-                        user_answer = st.radio("Select your answer:", options, key=question)
+                        user_answer = st.radio("Select your answer:", options, key=question, index=None)
                         st.session_state.correct_answers[question] = correct_answer
-                        st.session_state.answers[question] = user_answer
+
+                        if question not in st.session_state.answers:
+                            st.session_state.answers[question] = None
 
                     except IndexError:
                         st.error(f"An error occurred while processing the question: {q}")
@@ -105,7 +107,7 @@ if api_key and video_id:
 
                 if submit_button:
                     for question, correct_answer in st.session_state.correct_answers.items():
-                        user_answer = st.session_state.answers.get(question, None)
+                        user_answer = st.session_state.answers.get(question)
                         if user_answer:
                             if user_answer == correct_answer:
                                 st.success(f'Correct! {correct_answer} is the right answer for: {question}', icon="✅")
