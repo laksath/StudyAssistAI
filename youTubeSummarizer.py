@@ -119,12 +119,12 @@ if api_key and video_id:
 
                         if 'submitted' in st.session_state and st.session_state.submitted:
                             if user_answer is None:
-                                st.warning(f'No answer selected for: {question}')
+                                st.warning(f'No answer selected')
                             else:
                                 if user_answer == correct_answer:
-                                    st.success(f'Correct! {correct_answer} is the right answer for: {question}', icon="✅")
+                                    st.success(f'Correct! {correct_answer} is the right answer', icon="✅")
                                 else:
-                                    st.error(f'Incorrect! The correct answer is {correct_answer} for: {question}', icon="❌")
+                                    st.error(f'Incorrect! The correct answer is {correct_answer}', icon="❌")
                     except IndexError:
                         st.error(f"An error occurred while processing the question: {q}")
 
