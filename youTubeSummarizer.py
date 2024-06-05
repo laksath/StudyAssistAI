@@ -3,47 +3,55 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import requests
 import json
 
-
 st.title('YouTube Video Summarizer')
 st.write("We summarize the YouTube videos for you so you don't have to.")
 
-api_key = st.text_input("Enter you API key", type='password')
+api_key = st.text_input("Enter your API key", type='password')
 video_id = st.text_input('Enter the YouTube Video ID:', '')
 
 if api_key and video_id:
-  try:
-    # Fetching the transcript
-    transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
-    full_transcript = " ".join([t['text'] for t in transcript_list])
+    try:
+        # Fetching the transcript
+        transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
+        full_transcript = " ".join([t['text'] for t in transcript_list])
 
-    # Displaying the transcript
-    st.subheader('Transcript:')
-    st.write(full_transcript)
+        # Create two buttons side by side
+        col1, col2 = st.columns(2)
+        with col1:
+            show_transcript = st.button('View Transcript')
+        with col2:
+            show_summary = st.button('View Summary')
 
-    # Connect to the ChatGPT API
-    endpoint = 'https://api.openai.com/v1/chat/completions'
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json'
-    }
+        # Display the transcript if the button is clicked
+        if show_transcript:
+            st.subheader('Transcript:')
+            st.write(full_transcript)
 
-    data = {
-        'model': 'gpt-4-0613',  # or the model of your choice
-        'messages': [{'role': 'user', 'content': f'Summarize the following text using bullet points: {full_transcript}'}],
-        'max_tokens': 4000 # change this to whatever you want
-    }
+        if show_summary:
+            # Connect to the ChatGPT API
+            endpoint = 'https://api.openai.com/v1/chat/completions'
+            headers = {
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
+            }
 
-    # Send the transcript to ChatGPT for summarization
-    response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+            data = {
+                'model': 'gpt-4-0613',  # or the model of your choice
+                'messages': [{'role': 'user', 'content': f'Summarize the following text using bullet points: {full_transcript}'}],
+                'max_tokens': 4000  # change this to whatever you want
+            }
 
-    # Check if the response is successful
-    if response.status_code == 200:
-        # Extracting the summary from the response
-        json_response = response.json()
-        summary = json_response['choices'][0]['message']['content'].strip()
-        st.subheader('Summary:')
-        st.write(summary)
-    else: 
-      st.error(f"Error in API request: {response.status_code}, {response.text}")
-  except Exception as e:
-    st.error(f'An error occurred: {e}')
+            # Send the transcript to ChatGPT for summarization
+            response = requests.post(endpoint, headers=headers, data=json.dumps(data))
+
+            # Check if the response is successful
+            if response.status_code == 200:
+                # Extracting the summary from the response
+                json_response = response.json()
+                summary = json_response['choices'][0]['message']['content'].strip()
+                st.subheader('Summary:')
+                st.write(summary)
+            else:
+                st.error(f"Error in API request: {response.status_code}, {response.text}")
+    except Exception as e:
+        st.error(f'An error occurred: {e}')
