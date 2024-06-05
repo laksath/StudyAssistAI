@@ -1,4 +1,4 @@
-# StudyHelperAI
+# StudyAssistAI
 
 
 ### Project Description
