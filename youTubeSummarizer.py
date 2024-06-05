@@ -106,7 +106,7 @@ if api_key and video_id:
             with st.form(key='mcq_form'):
                 for q in questions:
                     try:
-                        parts = q.split('\n')
+                        parts = q.strip().split('\n')
                         question = parts[0]
                         options = parts[1:5]
                         answer = parts[5]
@@ -121,7 +121,7 @@ if api_key and video_id:
                             if user_answer is None:
                                 st.warning(f'No answer selected')
                             else:
-                                if user_answer == correct_answer:
+                                if user_answer.strip() == correct_answer:
                                     st.success(f'Correct! {correct_answer} is the right answer', icon="✅")
                                 else:
                                     st.error(f'Incorrect! The correct answer is {correct_answer}', icon="❌")
