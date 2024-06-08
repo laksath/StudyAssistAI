@@ -40,7 +40,9 @@ client = OpenAI(
     api_key=os.getenv('OPENAI_API_KEY')
 )
 
-def generate_response(prompt):
+def generate_worksheet_response(grade_level, topic_or_text):
+    prompt = generate_prompt(grade_level, topic_or_text)
+    
     completion = client.chat.completions.create(
     model="gpt-4o",
     messages=[
