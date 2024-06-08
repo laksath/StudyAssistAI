@@ -1,22 +1,6 @@
 from openai import OpenAI
 import os
 
-def gpt4o_text_generation(prompt):
-    client = OpenAI(
-        api_key=os.getenv('OPENAI_API_KEY')
-    )
-
-    response = client.images.generate(
-        model="gpt-4o",
-        prompt=prompt,
-        size="1024x1024",
-        quality="standard",
-        n=1
-    )
-
-    image_url = response.data[0].url
-    return image_url
-
 def generate_prompt(grade_level, topic_or_text):
     prompt = f"""
     You are an experienced educational content creator. I need you to generate a worksheet for students based on the following information:
