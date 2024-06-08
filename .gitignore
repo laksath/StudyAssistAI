@@ -1,1 +1,12 @@
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
 .env
+
+# Ignore checkpoints
+*-checkpoint.ipynb
+
+# Other files or directories to ignore
+.DS_Store
+node_modules/
