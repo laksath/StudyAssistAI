@@ -1,5 +1,7 @@
 import requests
 import json
+import re
+from urllib.parse import urlparse, parse_qs
 
 def generate_summary_prompt(full_transcript):
     return f"Summarize the following text using bullet points: {full_transcript}"
@@ -27,3 +29,19 @@ def generate_yt_gpt_response(api_key, instruction, max_tokens):
         return summary
     else:
         raise Exception(f"Error in API request: {response.status_code}, {response.text}")
+    
+def extract_video_id(url):
+    """
+    Extracts the YouTube video ID from the given URL.
+    """
+    video_id = None
+    match = re.match(r'(https?://)?(www\.)?(youtube\.com|youtu\.?be)/.+', url)
+    if match:
+        if 'youtube.com' in url:
+            query = urlparse(url).query
+            video_id = parse_qs(query).get('v')
+            if video_id:
+                video_id = video_id[0]
+        elif 'youtu.be' in url:
+            video_id = url.split('/')[-1]
+    return video_id
