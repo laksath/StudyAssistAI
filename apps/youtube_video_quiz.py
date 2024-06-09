@@ -1,6 +1,6 @@
 import streamlit as st
 from youtube_transcript_api import YouTubeTranscriptApi
-from gpts.youtube_gpt import *
+from helper.youtube_gpt import *
 import re
 from urllib.parse import urlparse, parse_qs
 
@@ -107,36 +107,46 @@ def youtube_video_quiz():
                 st.subheader('MCQs:')
                 questions = st.session_state.mcqs.split('\n\n')  # Assuming each question is separated by a blank line
 
-                with st.form(key='mcq_form'):
-                    for q in questions:
-                        try:
-                            parts = q.strip().split('\n')
-                            question = parts[0]
-                            options = parts[1:5]
-                            answer = parts[5]
-                            correct_answer = answer.split(': ')[1].strip()
+                for q in questions:
+                    try:
+                        parts = q.strip().split('\n')
+                        question = parts[0]
+                        options = parts[1:5]
+                        answer = parts[5]
+                        correct_answer = answer.split(': ')[1].strip()
 
-                            st.write(question)
-                            user_answer = st.radio("Select your answer:", options, key=question, index=None)
-                            st.session_state.correct_answers[question] = correct_answer
-                            st.session_state.answers[question] = user_answer
+                        st.write(question)
 
-                            if st.session_state.submitted:
-                                if user_answer is None:
-                                    st.warning(f'No answer selected')
+                        # Use the session state to set the initial selected value
+                        if question not in st.session_state.answers:
+                            st.session_state.answers[question] = None
+
+                        user_answer = st.radio(
+                            "Select your answer:", options, 
+                            key=f"{question}_options",
+                            index=options.index(st.session_state.answers[question]) if st.session_state.answers[question] else None
+                        )
+
+                        # Update session state with the selected answer immediately
+                        st.session_state.answers[question] = user_answer
+                        st.session_state.correct_answers[question] = correct_answer
+
+                        if st.session_state.submitted:
+                            if user_answer is None:
+                                st.warning(f'No answer selected')
+                            else:
+                                if user_answer.strip() == correct_answer:
+                                    st.success(f'Correct! {correct_answer} is the right answer', icon="✅")
                                 else:
-                                    if user_answer.strip() == correct_answer:
-                                        st.success(f'Correct! {correct_answer} is the right answer', icon="✅")
-                                    else:
-                                        st.error(f'Incorrect! The correct answer is {correct_answer}', icon="❌")
-                        except IndexError:
-                            st.error(f"An error occurred while processing the question: {q}")
+                                    st.error(f'Incorrect! The correct answer is {correct_answer}', icon="❌")
+                    except IndexError:
+                        st.error(f"An error occurred while processing the question: {q}")
 
-                    submit_button = st.form_submit_button(label='Submit Answers')
+                submit_button = st.button(label='Submit Answers')
 
-                    if submit_button:
-                        st.session_state.submitted = True
-                        st.experimental_rerun()
+                if submit_button:
+                    st.session_state.submitted = True
+                    st.experimental_rerun()
 
         except Exception as e:
             st.error(f'An error occurred: {e}')
