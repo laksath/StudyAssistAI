@@ -91,22 +91,21 @@ def generate_prompt(grade_level, topic_or_text):
 
     ---
     """
-    
     return prompt
 
-def generate_worksheet_response(api_keys, grade_level, topic_or_text):
+def generate_worksheet_response(api_key, grade_level, topic_or_text):
     prompt = generate_prompt(grade_level, topic_or_text)
     
     client = OpenAI(
-        api_key=os.getenv(api_keys)
+        api_key=os.getenv(api_key)
     )
     
     completion = client.chat.completions.create(
-    model="gpt-4o",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": prompt}
-    ]
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ]
     )
 
     return completion.choices[0].message.content

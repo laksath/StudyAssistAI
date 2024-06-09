@@ -1,12 +1,12 @@
 import streamlit as st
-from apps import home, youtube_video_quiz, page2, page3
+from apps import home, youtube_video_quiz, worksheet_generator, page3
 
 def main():
     st.sidebar.title("Navigation")
     pages = {
         "Home": home.home_page,
         "YouTube Video Summarizer and Quiz Generator": youtube_video_quiz.youtube_video_quiz,
-        "Page 2": page2.page2,
+        "Worksheet Generator": worksheet_generator.worksheet_generator,
         "Page 3": page3.page3,
     }
     selection = st.sidebar.radio("Go to", list(pages.keys()))
