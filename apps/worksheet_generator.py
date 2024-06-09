@@ -44,4 +44,4 @@ def worksheet_generator():
 
     if st.session_state.worksheet_response:
         st.subheader('Generated Worksheet:')
-        st.markdown(st.session_state.worksheet_response)
+        st.markdown(f"```{st.session_state.worksheet_response}```", unsafe_allow_html=True)
