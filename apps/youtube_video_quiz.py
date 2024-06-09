@@ -5,12 +5,31 @@ import re
 from urllib.parse import urlparse, parse_qs
 
 def youtube_video_quiz():
-    
     st.title('YouTube Video Summarizer and Quiz Generator')
     st.write("We summarize the YouTube videos and generate quizzes for you so you don't have to.")
 
-    api_key = st.text_input("Enter your API key", type='password')
-    video_url = st.text_input('Enter the YouTube Video URL:', '')
+    if 'api_key' not in st.session_state:
+        st.session_state.api_key = ''
+    if 'video_url' not in st.session_state:
+        st.session_state.video_url = ''
+    if 'full_transcript' not in st.session_state:
+        st.session_state.full_transcript = ''
+    if 'summary' not in st.session_state:
+        st.session_state.summary = ''
+    if 'mcqs' not in st.session_state:
+        st.session_state.mcqs = ''
+    if 'submitted' not in st.session_state:
+        st.session_state.submitted = False
+    if 'answers' not in st.session_state:
+        st.session_state.answers = {}
+    if 'correct_answers' not in st.session_state:
+        st.session_state.correct_answers = {}
+
+    api_key = st.text_input("Enter your API key", type='password', value=st.session_state.api_key)
+    video_url = st.text_input('Enter the YouTube Video URL:', value=st.session_state.video_url)
+
+    st.session_state.api_key = api_key
+    st.session_state.video_url = video_url
 
     def extract_video_id(url):
         """
@@ -45,7 +64,8 @@ def youtube_video_quiz():
     video_id = extract_video_id(video_url)
     if api_key and video_id:
         try:
-            full_transcript = fetch_transcript(video_id)
+            if st.session_state.full_transcript == '':
+                st.session_state.full_transcript = fetch_transcript(video_id)
 
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -57,23 +77,20 @@ def youtube_video_quiz():
 
             if show_transcript:
                 st.subheader('Transcript:')
-                st.write(full_transcript)
+                st.write(st.session_state.full_transcript)
 
             if show_summary:
-                summary = summarize_transcript(api_key, full_transcript)
+                if st.session_state.summary == '':
+                    st.session_state.summary = summarize_transcript(api_key, st.session_state.full_transcript)
                 st.subheader('Summary:')
-                st.write(summary)
+                st.write(st.session_state.summary)
 
-            if show_mcqs or 'mcqs' in st.session_state:
-                if show_mcqs:
-                    st.session_state.mcqs = generate_mcqs(api_key, full_transcript)
+            if show_mcqs or st.session_state.mcqs:
+                if show_mcqs and st.session_state.mcqs == '':
+                    st.session_state.mcqs = generate_mcqs(api_key, st.session_state.full_transcript)
                 
                 st.subheader('MCQs:')
                 questions = st.session_state.mcqs.split('\n\n')  # Assuming each question is separated by a blank line
-
-                if 'answers' not in st.session_state:
-                    st.session_state.answers = {}
-                    st.session_state.correct_answers = {}
 
                 with st.form(key='mcq_form'):
                     for q in questions:
@@ -89,7 +106,7 @@ def youtube_video_quiz():
                             st.session_state.correct_answers[question] = correct_answer
                             st.session_state.answers[question] = user_answer
 
-                            if 'submitted' in st.session_state and st.session_state.submitted:
+                            if st.session_state.submitted:
                                 if user_answer is None:
                                     st.warning(f'No answer selected')
                                 else:
