@@ -15,8 +15,6 @@ def worksheet_generator():
         st.session_state.worksheet_response = ''
     if 'input_attempted' not in st.session_state:
         st.session_state.input_attempted = False
-        
-    print(st.session_state.worksheet_response)
 
     # Input fields
     api_key = st.text_input("Enter your API key", type='password', value=st.session_state.api_key)
