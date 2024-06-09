@@ -1,5 +1,6 @@
 import streamlit as st
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_gpt import *
 import requests
 import json
 import re
@@ -27,27 +28,6 @@ def extract_video_id(url):
             video_id = url.split('/')[-1]
     return video_id
 
-def generate_gpt_response(api_key, instruction, max_tokens):
-    endpoint = 'https://api.openai.com/v1/chat/completions'
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json'
-    }
-
-    data = {
-        'model': 'gpt-4-0613',  # or the model of your choice
-        'messages': [{'role': 'user', 'content': instruction}],
-        'max_tokens': max_tokens  # change this to whatever you want
-    }
-
-    response = requests.post(endpoint, headers=headers, data=json.dumps(data))
-    if response.status_code == 200:
-        json_response = response.json()
-        summary = json_response['choices'][0]['message']['content'].strip()
-        return summary
-    else:
-        raise Exception(f"Error in API request: {response.status_code}, {response.text}")
-
 @st.cache_data
 def fetch_transcript(video_id):
     transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
@@ -56,19 +36,11 @@ def fetch_transcript(video_id):
 
 @st.cache_data
 def summarize_transcript(api_key, full_transcript):
-    return generate_gpt_response(
-        api_key,
-        f'Summarize the following text using bullet points: {full_transcript}',
-        4000
-    )
+    return generate_yt_gpt_response(api_key, generate_summary_prompt(full_transcript), 4000)
 
 @st.cache_data
 def generate_mcqs(api_key, full_transcript):
-    return generate_gpt_response(
-        api_key,
-        f'Generate 5 multiple-choice questions based on the following text: {full_transcript}. Format the questions and options as follows: Q1. Question? a) Option 1 b) Option 2 c) Option 3 d) Option 4. Provide the correct answer at the end of each question with "Answer: option".',
-        4000
-    )
+    return generate_yt_gpt_response(api_key, generate_mcq_prompt(full_transcript), 4000)
 
 video_id = extract_video_id(video_url)
 if api_key and video_id:
