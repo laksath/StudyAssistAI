@@ -24,6 +24,12 @@ def youtube_video_quiz():
         st.session_state.answers = {}
     if 'correct_answers' not in st.session_state:
         st.session_state.correct_answers = {}
+    if 'show_transcript' not in st.session_state:
+        st.session_state.show_transcript = False
+    if 'show_summary' not in st.session_state:
+        st.session_state.show_summary = False
+    if 'show_mcqs' not in st.session_state:
+        st.session_state.show_mcqs = False
 
     api_key = st.text_input("Enter your API key", type='password', value=st.session_state.api_key)
     video_url = st.text_input('Enter the YouTube Video URL:', value=st.session_state.video_url)
@@ -69,24 +75,33 @@ def youtube_video_quiz():
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                show_transcript = st.button('View Transcript')
+                if st.button('View Transcript'):
+                    st.session_state.show_transcript = True
+                    st.session_state.show_summary = False
+                    st.session_state.show_mcqs = False
             with col2:
-                show_summary = st.button('View Summary')
+                if st.button('View Summary'):
+                    st.session_state.show_transcript = False
+                    st.session_state.show_summary = True
+                    st.session_state.show_mcqs = False
             with col3:
-                show_mcqs = st.button('Generate MCQs')
+                if st.button('Generate MCQs'):
+                    st.session_state.show_transcript = False
+                    st.session_state.show_summary = False
+                    st.session_state.show_mcqs = True
 
-            if show_transcript:
+            if st.session_state.show_transcript:
                 st.subheader('Transcript:')
                 st.write(st.session_state.full_transcript)
 
-            if show_summary:
+            if st.session_state.show_summary:
                 if st.session_state.summary == '':
                     st.session_state.summary = summarize_transcript(api_key, st.session_state.full_transcript)
                 st.subheader('Summary:')
                 st.write(st.session_state.summary)
 
-            if show_mcqs or st.session_state.mcqs:
-                if show_mcqs and st.session_state.mcqs == '':
+            if st.session_state.show_mcqs:
+                if st.session_state.mcqs == '':
                     st.session_state.mcqs = generate_mcqs(api_key, st.session_state.full_transcript)
                 
                 st.subheader('MCQs:')
