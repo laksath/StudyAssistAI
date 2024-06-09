@@ -94,12 +94,12 @@ def generate_prompt(grade_level, topic_or_text):
     
     return prompt
 
-client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY')
-)
-
-def generate_worksheet_response(grade_level, topic_or_text):
+def generate_worksheet_response(api_keys, grade_level, topic_or_text):
     prompt = generate_prompt(grade_level, topic_or_text)
+    
+    client = OpenAI(
+        api_key=os.getenv(api_keys)
+    )
     
     completion = client.chat.completions.create(
     model="gpt-4o",
