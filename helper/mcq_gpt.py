@@ -29,12 +29,15 @@ Answer: A
 Repeat this format for {number_of_questions} questions."""
     return prompt
   
-def generate_worksheet_response(api_key, topic_or_text, no_of_questions):
-    prompt = generate_mcq_prompt(topic_or_text, no_of_questions)
+def generate_mcq_response(api_key, passage, no_of_questions):
+    prompt = generate_mcq_prompt(passage, no_of_questions)
     
     client = OpenAI(
         api_key=os.getenv(api_key)
     )
+    
+    # print(client.get_api_list)
+    # print(len(prompt))
     
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -43,6 +46,8 @@ def generate_worksheet_response(api_key, topic_or_text, no_of_questions):
             {"role": "user", "content": prompt}
         ]
     )
+    
+    # print(completion)
 
     return completion.choices[0].message.content
 
