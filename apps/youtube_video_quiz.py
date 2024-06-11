@@ -148,4 +148,4 @@ def youtube_video_quiz():
 
             if submit_button:
                 st.session_state.submitted = True
-                st.experimental_rerun()
+                st.rerun()

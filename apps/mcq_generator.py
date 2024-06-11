@@ -47,9 +47,17 @@ def mcq_generator():
     if st.session_state.mcq_input_attempted and not st.session_state.mcq_response:
         st.error("Please fill in all the fields correctly.")
 
+    mapping = {
+        'A': 0,
+        'B': 1,
+        'C': 2,
+        'D': 3
+    }
+    
     if st.session_state.mcq_response:
         st.subheader('Generated MCQs:')
         questions, choices, answers = parse_mcq_prompt(st.session_state.mcq_response)
+        print(questions, choices, answers)
 
         for idx, question in enumerate(questions):
             st.write(f"Q{idx + 1}: {question}")
@@ -58,10 +66,18 @@ def mcq_generator():
             if question not in st.session_state.mcq_answers:
                 st.session_state.mcq_answers[question] = None
 
+            # Determine the index of the previously selected answer, if it exists
+            selected_index = None
+            if st.session_state.mcq_answers[question]:
+                try:
+                    selected_index = choices[idx].index(st.session_state.mcq_answers[question])
+                except ValueError:
+                    selected_index = None
+
             user_answer = st.radio(
                 "Select your answer:", choices[idx], 
                 key=f"{question}_options",
-                index=choices[idx].index(st.session_state.mcq_answers[question]) if st.session_state.mcq_answers[question] else None
+                index=selected_index
             )
 
             # Update session state with the selected answer immediately
@@ -72,7 +88,7 @@ def mcq_generator():
                 if user_answer is None:
                     st.warning(f'No answer selected')
                 else:
-                    if user_answer.strip() == answers[idx]:
+                    if selected_index == mapping[answers[idx]]:
                         st.success(f'Correct! {answers[idx]} is the right answer', icon="✅")
                     else:
                         st.error(f'Incorrect! The correct answer is {answers[idx]}', icon="❌")
@@ -81,4 +97,4 @@ def mcq_generator():
 
         if submit_button:
             st.session_state.mcq_submitted = True
-            st.experimental_rerun()
+            st.rerun()
