@@ -1,6 +1,7 @@
 import streamlit as st
 from youtube_transcript_api import YouTubeTranscriptApi
 from helper.youtube_gpt import *
+from helper.mcq_gpt import parse_mcq_prompt
 
 def youtube_video_quiz():
     st.title('YouTube Video Summarizer and Quiz Generator')
@@ -53,7 +54,7 @@ def youtube_video_quiz():
 
     @st.cache_data
     def generate_mcqs(api_key, full_transcript):
-        return generate_yt_gpt_response(api_key, generate_mcq_prompt(full_transcript), 4000)
+        return generate_yt_gpt_response(api_key, generate_yt_mcq_prompt(full_transcript), 4000)
 
     # Fetch video data button
     if st.button('Fetch Video Data'):
@@ -64,7 +65,6 @@ def youtube_video_quiz():
                 if st.session_state.full_transcript == '':
                     st.session_state.full_transcript = fetch_transcript(video_id)
                 st.session_state.data_fetched = True
-
             except Exception as e:
                 st.error(f'An error occurred: {e}')
         else:
@@ -74,6 +74,13 @@ def youtube_video_quiz():
     if st.session_state.input_attempted and not st.session_state.data_fetched:
         st.error("Please enter a valid YouTube video URL.")
 
+    mapping = {
+        'A': 0,
+        'B': 1,
+        'C': 2,
+        'D': 3
+    }
+    
     if st.session_state.data_fetched:
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -107,42 +114,41 @@ def youtube_video_quiz():
                 st.session_state.mcqs = generate_mcqs(api_key, st.session_state.full_transcript)
             
             st.subheader('MCQs:')
-            questions = st.session_state.mcqs.split('\n\n')  # Assuming each question is separated by a blank line
+            questions, choices, answers = parse_mcq_prompt(st.session_state.mcqs)
+            
+            for idx, question in enumerate(questions):
+                st.write(f"Q{idx + 1}: {question}")
 
-            for q in questions:
-                try:
-                    parts = q.strip().split('\n')
-                    question = parts[0]
-                    options = parts[1:5]
-                    answer = parts[5]
-                    correct_answer = answer.split(': ')[1].strip()
+                # Use the session state to set the initial selected value
+                if question not in st.session_state.answers:
+                    st.session_state.answers[question] = None
 
-                    st.write(question)
+                # Determine the index of the previously selected answer, if it exists
+                selected_index = None
+                if st.session_state.answers[question]:
+                    try:
+                        selected_index = choices[idx].index(st.session_state.answers[question])
+                    except ValueError:
+                        selected_index = None
 
-                    # Use the session state to set the initial selected value
-                    if question not in st.session_state.answers:
-                        st.session_state.answers[question] = None
+                user_answer = st.radio(
+                    "Select your answer:", choices[idx], 
+                    key=f"{question}_options",
+                    index=selected_index
+                )
 
-                    user_answer = st.radio(
-                        "Select your answer:", options, 
-                        key=f"{question}_options",
-                        index=options.index(st.session_state.answers[question]) if st.session_state.answers[question] else None
-                    )
+                # Update session state with the selected answer immediately
+                st.session_state.answers[question] = user_answer
+                st.session_state.correct_answers[question] = answers[idx]
 
-                    # Update session state with the selected answer immediately
-                    st.session_state.answers[question] = user_answer
-                    st.session_state.correct_answers[question] = correct_answer
-
-                    if st.session_state.submitted:
-                        if user_answer is None:
-                            st.warning(f'No answer selected')
+                if st.session_state.submitted:
+                    if user_answer is None:
+                        st.warning(f'No answer selected')
+                    else:
+                        if selected_index == mapping[answers[idx]]:
+                            st.success(f'Correct! {answers[idx]} is the right answer', icon="✅")
                         else:
-                            if user_answer.strip() == correct_answer:
-                                st.success(f'Correct! {correct_answer} is the right answer', icon="✅")
-                            else:
-                                st.error(f'Incorrect! The correct answer is {correct_answer}', icon="❌")
-                except IndexError:
-                    st.error(f"An error occurred while processing the question: {q}")
+                            st.error(f'Incorrect! The correct answer is {answers[idx]}', icon="❌")
 
             submit_button = st.button(label='Submit Answers')
 

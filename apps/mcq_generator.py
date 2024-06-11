@@ -57,7 +57,6 @@ def mcq_generator():
     if st.session_state.mcq_response:
         st.subheader('Generated MCQs:')
         questions, choices, answers = parse_mcq_prompt(st.session_state.mcq_response)
-        print(questions, choices, answers)
 
         for idx, question in enumerate(questions):
             st.write(f"Q{idx + 1}: {question}")

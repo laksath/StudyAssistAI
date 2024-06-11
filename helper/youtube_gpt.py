@@ -2,12 +2,13 @@ import requests
 import json
 import re
 from urllib.parse import urlparse, parse_qs
+from helper.mcq_gpt import generate_mcq_prompt
 
 def generate_summary_prompt(full_transcript):
     return f"Summarize the following text using bullet points: {full_transcript}"
 
-def generate_mcq_prompt(full_transcript):
-    return f'Generate 5 multiple-choice questions based on the following text: {full_transcript}. Format the questions and options as follows: Q1. Question? a) Option 1 b) Option 2 c) Option 3 d) Option 4. Provide the correct answer at the end of each question with "Answer: option".'
+def generate_yt_mcq_prompt(full_transcript):
+    return generate_mcq_prompt(full_transcript, 5)
 
 def generate_yt_gpt_response(api_key, instruction, max_tokens):
     endpoint = 'https://api.openai.com/v1/chat/completions'
