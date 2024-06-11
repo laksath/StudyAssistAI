@@ -42,17 +42,14 @@ def youtube_video_quiz():
     st.session_state.api_key = api_key
     st.session_state.video_url = video_url
 
-    @st.cache_data
     def fetch_transcript(video_id):
         transcript_list = YouTubeTranscriptApi.get_transcript(video_id)
         full_transcript = " ".join([t['text'] for t in transcript_list])
         return full_transcript
 
-    @st.cache_data
     def summarize_transcript(api_key, full_transcript):
         return generate_yt_gpt_response(api_key, generate_summary_prompt(full_transcript), 4000)
 
-    @st.cache_data
     def generate_mcqs(api_key, full_transcript):
         return generate_yt_gpt_response(api_key, generate_yt_mcq_prompt(full_transcript), 4000)
 
