@@ -32,12 +32,7 @@ Repeat this format for {number_of_questions} questions."""
 def generate_mcq_response(api_key, passage, no_of_questions):
     prompt = generate_mcq_prompt(passage, no_of_questions)
     
-    client = OpenAI(
-        api_key=os.getenv(api_key)
-    )
-    
-    # print(client.get_api_list)
-    # print(len(prompt))
+    client = OpenAI(api_key=api_key)
     
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -46,8 +41,6 @@ def generate_mcq_response(api_key, passage, no_of_questions):
             {"role": "user", "content": prompt}
         ]
     )
-    
-    # print(completion)
 
     return completion.choices[0].message.content
 

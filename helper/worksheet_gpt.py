@@ -96,9 +96,7 @@ def generate_prompt(grade_level, topic_or_text):
 def generate_worksheet_response(api_key, grade_level, topic_or_text):
     prompt = generate_prompt(grade_level, topic_or_text)
     
-    client = OpenAI(
-        api_key=os.getenv(api_key)
-    )
+    client = OpenAI(api_key=api_key)
     
     completion = client.chat.completions.create(
         model="gpt-4o",
