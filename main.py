@@ -7,7 +7,7 @@ def main():
         "Home": home.home_page,
         "YouTube Video Summarizer and Quiz Generator": youtube_video_quiz.youtube_video_quiz,
         "Worksheet Generator": worksheet_generator.worksheet_generator,
-        "Page 3": page3.page3,
+        "Multiple Choice Assessments": page3.page3,
     }
     selection = st.sidebar.radio("Go to", list(pages.keys()))
     pages[selection]()
