@@ -51,7 +51,7 @@ def home_page():
     st.write("Navigate through the sidebar to explore various features and start your learning journey with StudyAssist AI!")
 
     # Footer or additional information
-    st.write("""
-    ---
-    Created by [Your Name or Company]
-    """)
+    # st.write("""
+    # ---
+    # Created by [Your Name or Company]
+    # """)
