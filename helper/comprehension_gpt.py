@@ -36,7 +36,7 @@ def generate_comprehension_prompt(text, num_questions, grade_level):
     """
     return prompt
 
-def generate_worksheet_response(api_key, grade_level, num_questions, text):
+def generate_comprehension_response(api_key, grade_level, num_questions, text):
     prompt = generate_comprehension_prompt(text, num_questions, grade_level)
     
     client = OpenAI(api_key=api_key)

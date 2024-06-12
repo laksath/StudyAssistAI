@@ -2,4 +2,44 @@ import streamlit as st
 from helper.comprehension_gpt import *
 
 def comprehension_generator():
-  return ''
+    st.title("Text Based Question Generator")
+
+    # Initialize session state variables
+    if 'api_key' not in st.session_state:
+        st.session_state.api_key = ''
+    if 'grade_level' not in st.session_state:
+        st.session_state.grade_level = ''
+    if 'comprehension_topic_or_text' not in st.session_state:
+        st.session_state.comprehension_topic_or_text = ''
+    if 'comprehension_response' not in st.session_state:
+        st.session_state.comprehension_response = ''
+    if 'comprehension_input_attempted' not in st.session_state:
+        st.session_state.comprehension_input_attempted = False
+
+    # Input fields
+    api_key = st.text_input("Enter your API key", type='password', value=st.session_state.api_key)
+    grade_level = st.text_input("Enter Grade Level:", value=st.session_state.grade_level)
+    comprehension_topic_or_text = st.text_area("Enter Topic or Text:", value=st.session_state.comprehension_topic_or_text)
+
+    st.session_state.api_key = api_key
+    st.session_state.grade_level = grade_level
+    st.session_state.comprehension_topic_or_text = comprehension_topic_or_text
+
+    # Generate Comprehension button
+    if st.button('Generate Comprehension'):
+        st.session_state.comprehension_input_attempted = True
+        if api_key and grade_level and comprehension_topic_or_text:
+            try:
+                st.session_state.comprehension_response = generate_comprehension_response(api_key, grade_level, comprehension_topic_or_text)
+            except Exception as e:
+                st.error(f'An error occurred: {e}')
+        else:
+            st.session_state.comprehension_response = None
+
+    # Show error message only if input has been attempted and data not fetched
+    if st.session_state.comprehension_input_attempted and not st.session_state.comprehension_response:
+        st.error("Please fill in all the fields correctly.")
+
+    if st.session_state.comprehension_response:
+        st.subheader('Generated Comprehension:')
+        st.markdown(f"```{st.session_state.comprehension_response}```", unsafe_allow_html=True)
