@@ -1,3 +1,4 @@
+openai
 streamlit
 youtube_transcript_api
 requests
