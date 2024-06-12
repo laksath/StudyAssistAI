@@ -59,8 +59,9 @@ def youtube_video_quiz():
         video_id = extract_video_id(video_url)
         if api_key and video_id:
             try:
-                if st.session_state.full_transcript == '':
-                    st.session_state.full_transcript = fetch_transcript(video_id)
+                st.session_state.full_transcript = fetch_transcript(video_id)
+                st.session_state.summary = ''  # Reset summary
+                st.session_state.mcqs = ''  # Reset MCQs
                 st.session_state.data_fetched = True
             except Exception as e:
                 st.error(f'An error occurred: {e}')
