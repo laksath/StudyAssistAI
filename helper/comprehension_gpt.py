@@ -32,7 +32,7 @@ def generate_comprehension_prompt(text, num_questions, grade_level):
     Answer Key:
     1. The two main alliances were the Allies and the Axis powers. They involved nearly all of the world's countries and influenced the war through economic, industrial, and scientific capabilities.
     2. Aircraft played a major role in enabling strategic bombing and the delivery of nuclear weapons, leading to high fatalities and devastation.
-    3. Some contributing factors to the outbreak of World War II included the rise of fascism in Europe, the Spanish Civil War, the Second Sino-Japanese War, Soviet–Japanese border conflicts, and tensions from the aftermath of World War I.
+    3. Some contributing factors to the outbreak of World War II included the rise of fascism in Europe, the Spanish Civil War, the Second Sino-Japanese War, Soviet-Japanese border conflicts, and tensions from the aftermath of World War I.
     """
     return prompt
 
