@@ -9,6 +9,8 @@ def comprehension_generator():
         st.session_state.api_key = ''
     if 'grade_level' not in st.session_state:
         st.session_state.grade_level = ''
+    if 'comprehension_no_of_questions' not in st.session_state:
+        st.session_state.comprehension_no_of_questions = 5
     if 'comprehension_topic_or_text' not in st.session_state:
         st.session_state.comprehension_topic_or_text = ''
     if 'comprehension_response' not in st.session_state:
@@ -20,17 +22,19 @@ def comprehension_generator():
     api_key = st.text_input("Enter your API key", type='password', value=st.session_state.api_key)
     grade_level = st.text_input("Enter Grade Level:", value=st.session_state.grade_level)
     comprehension_topic_or_text = st.text_area("Enter Topic or Text:", value=st.session_state.comprehension_topic_or_text)
+    comprehension_no_of_questions = st.number_input("Enter Number of Questions:", min_value=1, value=st.session_state.comprehension_no_of_questions)
 
     st.session_state.api_key = api_key
     st.session_state.grade_level = grade_level
     st.session_state.comprehension_topic_or_text = comprehension_topic_or_text
+    st.session_state.comprehension_no_of_questions = comprehension_no_of_questions
 
     # Generate Comprehension button
     if st.button('Generate Comprehension'):
         st.session_state.comprehension_input_attempted = True
-        if api_key and grade_level and comprehension_topic_or_text:
+        if api_key and grade_level and comprehension_topic_or_text and comprehension_no_of_questions:
             try:
-                st.session_state.comprehension_response = generate_comprehension_response(api_key, grade_level, comprehension_topic_or_text)
+                st.session_state.comprehension_response = generate_comprehension_response(api_key, grade_level, comprehension_no_of_questions, comprehension_topic_or_text)
             except Exception as e:
                 st.error(f'An error occurred: {e}')
         else:
