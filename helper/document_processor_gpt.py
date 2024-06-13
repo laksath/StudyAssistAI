@@ -12,8 +12,9 @@ from datetime import datetime
 def save_uploaded_file(uploaded_file):
     # Create a unique filename using the original filename and current timestamp
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    filename = f"{uploaded_file.name}_{timestamp}"
-    filepath = os.path.join("temp_files", filename)
+    filename, file_extension = os.path.splitext(uploaded_file.name)
+    unique_filename = f"{filename}_{timestamp}{file_extension}"
+    filepath = os.path.join("temp_files", unique_filename)
 
     # Ensure the temp_files directory exists
     os.makedirs("temp_files", exist_ok=True)
