@@ -7,6 +7,22 @@ import io
 import os
 import magic
 import docx
+from datetime import datetime
+
+def save_uploaded_file(uploaded_file):
+    # Create a unique filename using the original filename and current timestamp
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    filename = f"{uploaded_file.name}_{timestamp}"
+    filepath = os.path.join("temp_files", filename)
+
+    # Ensure the temp_files directory exists
+    os.makedirs("temp_files", exist_ok=True)
+
+    # Save the file
+    with open(filepath, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    
+    return filepath
 
 def extract_text_images(pdf_path):
     doc = fitz.open(pdf_path)
@@ -62,13 +78,13 @@ def extract_pdf_contents(pdf_path):
     combined_data = prepare_data_for_summary(text, tables, ocr_texts)
     return combined_data
 
-def extract_text(doc):
+def extract_doc_text(doc):
     text = []
     for paragraph in doc.paragraphs:
         text.append(paragraph.text)
     return "\n".join(text)
 
-def extract_tables(doc):
+def extract_doc_tables(doc):
     tables = []
     for table in doc.tables:
         table_data = []
@@ -89,8 +105,8 @@ def extract_images(doc):
       
 def extract_doc_contents(doc_path):
     doc = docx.Document(doc_path)
-    text = extract_text(doc)
-    tables = extract_tables(doc)
+    text = extract_doc_text(doc)
+    tables = extract_doc_tables(doc)
     images = extract_images(doc)
     ocr_texts = ocr_images(images)
     combined_data = prepare_data_for_summary(text, tables, ocr_texts)
@@ -148,7 +164,10 @@ def get_file_type(file_path):
     else:
         return 'unknown'
 
-def extract_summarized_pdf(file_path, api_key, task):
+def extract_summarized_document(file_path, api_key, task):
+    if file_path =='':
+        return ''
+
     file_type = get_file_type(file_path)
     if file_type == 'pdf':
       combined_data = extract_pdf_contents(file_path)
@@ -172,5 +191,5 @@ def extract_summarized_pdf(file_path, api_key, task):
     # If the combined summary is too long, summarize the summary
     if len(summary) > token_limit:
         summary = generate_summary(api_key, summary, task, max_tokens_per_chunk)
-        
-    return summary
+    
+    return f'\n{summary}'

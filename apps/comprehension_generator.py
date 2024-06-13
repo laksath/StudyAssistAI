@@ -1,5 +1,6 @@
 import streamlit as st
 from helper.comprehension_gpt import *
+from helper.document_processor_gpt import extract_summarized_document, save_uploaded_file
 
 def comprehension_generator():
     st.title("Text Based Question Generator")
@@ -29,12 +30,24 @@ def comprehension_generator():
     st.session_state.comprehension_topic_or_text = comprehension_topic_or_text
     st.session_state.comprehension_no_of_questions = comprehension_no_of_questions
 
+    # File upload for images, DOCX, and PDF
+    uploaded_file = st.file_uploader("Upload an image, DOCX, or PDF file", type=["png", "jpg", "jpeg", "docx", "pdf"])
+    filepath = ''
+    if uploaded_file:
+        filepath = save_uploaded_file(uploaded_file)
+    file_content = extract_summarized_document(filepath, api_key, 'comprehension')
+
     # Generate Comprehension button
     if st.button('Generate Comprehension'):
         st.session_state.comprehension_input_attempted = True
         if api_key and grade_level and comprehension_topic_or_text and comprehension_no_of_questions:
             try:
-                st.session_state.comprehension_response = generate_comprehension_response(api_key, grade_level, comprehension_no_of_questions, comprehension_topic_or_text)
+                st.session_state.comprehension_response = generate_comprehension_response(
+                    api_key, 
+                    grade_level, 
+                    comprehension_no_of_questions, 
+                    comprehension_topic_or_text+file_content
+                    )
             except Exception as e:
                 st.error(f'An error occurred: {e}')
         else:
