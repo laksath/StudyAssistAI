@@ -65,11 +65,11 @@ def summary_prompt(text, task):
     elif task == 'mcq':
         return f"Summarize the following text in detail to prepare it for a large number of MCQs and return only the summarized text:\n\n{text}"
     elif task == 'comprehension':
-        return f"Summarize the following text in detail to prepare it for comprehension-based questions and return only the summarized text:\n\n{text}"
+        return f"Summarize the following text in detail to prepare it for a large number of comprehension-based questions and return only the summarized text:\n\n{text}"
     else:
         return f"Summarize the following text:\n\n{text}"
 
-def generate_summary(api_key, text, task):
+def generate_summary(api_key, text, task, max_tokens):
     prompt = summary_prompt(text, task)
     client = OpenAI(api_key=api_key)
     
@@ -78,7 +78,8 @@ def generate_summary(api_key, text, task):
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        max_tokens=max_tokens
     )
 
     return completion.choices[0].message.content
