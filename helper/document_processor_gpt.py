@@ -45,7 +45,6 @@ def clean_table_data(table):
     return cleaned_table
 
 def prepare_data_for_summary(text, tables, ocr_texts):
-    # Combine all extracted elements into a single string for summarization
     combined_data = text
     for table in tables:
         cleaned_table = clean_table_data(table)
@@ -59,13 +58,19 @@ def extract_pdf_contents(pdf_path):
     ocr_texts = ocr_images(images)
     combined_data = prepare_data_for_summary(text, tables, ocr_texts)
     return combined_data
-  
-def summary_prompt(text):
-  return f"Summarize the following text in detail to prepare it for a worksheet and return only the summarized text:\n\n{text}"
 
-def generate_summary(api_key, text):
-    prompt = summary_prompt(text)
-    
+def summary_prompt(text, task):
+    if task == 'worksheet':
+        return f"Summarize the following text in detail to prepare it for a large worksheet and return only the summarized text:\n\n{text}"
+    elif task == 'mcq':
+        return f"Summarize the following text in detail to prepare it for a large number of MCQs and return only the summarized text:\n\n{text}"
+    elif task == 'comprehension':
+        return f"Summarize the following text in detail to prepare it for comprehension-based questions and return only the summarized text:\n\n{text}"
+    else:
+        return f"Summarize the following text:\n\n{text}"
+
+def generate_summary(api_key, text, task):
+    prompt = summary_prompt(text, task)
     client = OpenAI(api_key=api_key)
     
     completion = client.chat.completions.create(
@@ -78,7 +83,23 @@ def generate_summary(api_key, text):
 
     return completion.choices[0].message.content
 
-def extract_summarized_pdf(pdf_path, api_key):
-  combined_data = extract_pdf_contents(pdf_path)
-  summary = generate_summary(api_key, combined_data)
-  return summary
+def extract_summarized_pdf(pdf_path, api_key, task):
+    combined_data = extract_pdf_contents(pdf_path)
+    
+    # Define chunk size based on token limit
+    token_limit = 7000
+    input_token_limit = 3000  # Leave space for prompt and response
+    max_tokens_per_chunk = 2000  # Max tokens per API call response
+    
+    # Split combined_data into chunks within the token limit
+    chunks = [combined_data[i:i + input_token_limit] for i in range(0, len(combined_data), input_token_limit)]
+    
+    summary = ""
+    for chunk in chunks:
+        summary += generate_summary(api_key, chunk, task, max_tokens_per_chunk) + "\n"
+    
+    # If the combined summary is too long, summarize the summary
+    if len(summary) > token_limit:
+        summary = generate_summary(api_key, summary, task, max_tokens_per_chunk)
+        
+    return summary
