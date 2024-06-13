@@ -1,5 +1,4 @@
-from openai import OpenAI
-import os
+from helper.gpt import completion
 
 def generate_comprehension_prompt(text, num_questions, grade_level):
     prompt = f"""
@@ -38,15 +37,4 @@ def generate_comprehension_prompt(text, num_questions, grade_level):
 
 def generate_comprehension_response(api_key, grade_level, num_questions, text):
     prompt = generate_comprehension_prompt(text, num_questions, grade_level)
-    
-    client = OpenAI(api_key=api_key)
-    
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return completion.choices[0].message.content
+    return completion(api_key, 'gpt-4o', prompt)

@@ -1,4 +1,3 @@
-from openai import OpenAI
 import fitz  # PyMuPDF
 import pdfplumber
 from PIL import Image
@@ -8,6 +7,7 @@ import os
 import magic
 import docx
 from datetime import datetime
+from helper.gpt import completion
 
 def save_uploaded_file(uploaded_file):
     # Create a unique filename using the original filename and current timestamp
@@ -130,18 +130,7 @@ def summary_prompt(text, task):
 
 def generate_summary(api_key, text, task, max_tokens):
     prompt = summary_prompt(text, task)
-    client = OpenAI(api_key=api_key)
-    
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=max_tokens
-    )
-
-    return completion.choices[0].message.content
+    return completion(api_key, 'gpt-4o', prompt, max_tokens)
 
 def get_file_type(file_path):
     # Check the file extension first

@@ -1,6 +1,5 @@
-from openai import OpenAI
-import os
 import re
+from helper.gpt import completion
 
 def generate_mcq_prompt(passage, number_of_questions):
     prompt = f"""I need multiple-choice questions (MCQs) based on the following passage or essay: '{passage}'. Each question should have 4 options labeled A, B, C, and D. Provide the correct answer after each question in a separate line starting with 'Answer: '. Ensure there is a clear separator between each question and its corresponding answer. Follow the format exactly as shown below:
@@ -31,18 +30,7 @@ Repeat this format for {number_of_questions} questions."""
   
 def generate_mcq_response(api_key, passage, no_of_questions):
     prompt = generate_mcq_prompt(passage, no_of_questions)
-    
-    client = OpenAI(api_key=api_key)
-    
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return completion.choices[0].message.content
+    return completion(api_key, 'gpt-4o', prompt)
 
 def parse_mcq_prompt(prompt):
     # Define regular expressions for questions, choices, and answers
