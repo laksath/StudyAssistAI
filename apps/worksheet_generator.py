@@ -1,5 +1,6 @@
 import streamlit as st
 from helper.worksheet_gpt import generate_worksheet_response
+from helper.document_processor_gpt import extract_summarized_document, save_uploaded_file
 
 def worksheet_generator():
     st.title("Worksheet Generator")
@@ -24,13 +25,20 @@ def worksheet_generator():
     st.session_state.api_key = api_key
     st.session_state.grade_level = grade_level
     st.session_state.worksheet_topic_or_text = worksheet_topic_or_text
+        
+    # File upload for images, DOCX, and PDF
+    uploaded_file = st.file_uploader("Upload an image, DOCX, or PDF file", type=["png", "jpg", "jpeg", "docx", "pdf"])
+    filepath = ''
+    if uploaded_file:
+        filepath = save_uploaded_file(uploaded_file)
 
     # Generate Worksheet button
     if st.button('Generate Worksheet'):
+        file_content = extract_summarized_document(filepath, api_key, 'worksheet')
         st.session_state.worksheet_input_attempted = True
-        if api_key and grade_level and worksheet_topic_or_text:
+        if api_key and (grade_level or file_content!='') and worksheet_topic_or_text:
             try:
-                st.session_state.worksheet_response = generate_worksheet_response(api_key, grade_level, worksheet_topic_or_text)
+                st.session_state.worksheet_response = generate_worksheet_response(api_key, grade_level, worksheet_topic_or_text+file_content)
             except Exception as e:
                 st.error(f'An error occurred: {e}')
         else:

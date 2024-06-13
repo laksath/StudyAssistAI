@@ -40,7 +40,7 @@ def comprehension_generator():
     if st.button('Generate Comprehension'):
         file_content = extract_summarized_document(filepath, api_key, 'comprehension')
         st.session_state.comprehension_input_attempted = True
-        if api_key and grade_level and comprehension_topic_or_text and comprehension_no_of_questions:
+        if api_key and grade_level and (comprehension_topic_or_text or file_content!='') and comprehension_no_of_questions:
             try:
                 st.session_state.comprehension_response = generate_comprehension_response(
                     api_key, 

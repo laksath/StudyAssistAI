@@ -1,5 +1,6 @@
 import streamlit as st
 from helper.mcq_gpt import generate_mcq_response, parse_mcq_prompt
+from helper.document_processor_gpt import extract_summarized_document, save_uploaded_file
 
 def mcq_generator():
     st.title("MCQ Generator")
@@ -30,13 +31,20 @@ def mcq_generator():
     st.session_state.api_key = api_key
     st.session_state.mcq_passage = mcq_passage
     st.session_state.mcq_no_of_questions = mcq_no_of_questions
+    
+    # File upload for images, DOCX, and PDF
+    uploaded_file = st.file_uploader("Upload an image, DOCX, or PDF file", type=["png", "jpg", "jpeg", "docx", "pdf"])
+    filepath = ''
+    if uploaded_file:
+        filepath = save_uploaded_file(uploaded_file)
 
     # Generate MCQs button
     if st.button('Generate MCQs'):
+        file_content = extract_summarized_document(filepath, api_key, 'mcq')
         st.session_state.mcq_input_attempted = True
-        if api_key and mcq_passage and mcq_no_of_questions:
+        if api_key and (mcq_passage or file_content!='') and mcq_no_of_questions:
             try:
-                st.session_state.mcq_response = generate_mcq_response(api_key, mcq_passage, mcq_no_of_questions)
+                st.session_state.mcq_response = generate_mcq_response(api_key, mcq_passage+file_content, mcq_no_of_questions)
                 st.session_state.mcq_submitted = False  # Reset submission state
             except Exception as e:
                 st.error(f'An error occurred: {e}')
