@@ -35,10 +35,10 @@ def comprehension_generator():
     filepath = ''
     if uploaded_file:
         filepath = save_uploaded_file(uploaded_file)
-    file_content = extract_summarized_document(filepath, api_key, 'comprehension')
 
     # Generate Comprehension button
     if st.button('Generate Comprehension'):
+        file_content = extract_summarized_document(filepath, api_key, 'comprehension')
         st.session_state.comprehension_input_attempted = True
         if api_key and grade_level and comprehension_topic_or_text and comprehension_no_of_questions:
             try:
