@@ -18,7 +18,7 @@ def generate_yt_gpt_response(api_key, instruction, max_tokens):
     }
 
     data = {
-        'model': 'gpt-4-0613',  # or the model of your choice
+        'model': 'gpt-4o',  # or the model of your choice
         'messages': [{'role': 'user', 'content': instruction}],
         'max_tokens': max_tokens  # change this to whatever you want
     }
