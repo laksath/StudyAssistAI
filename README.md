@@ -2,7 +2,7 @@
 
 
 ### Project Description
-EduDashboardAI is a comprehensive full-stack web application designed to assist teachers with their educational tasks. The dashboard includes four main sections:
+StudyAssistAI is a comprehensive full-stack web application designed to assist teachers with their educational tasks. The dashboard includes four main sections:
 
 1. Worksheet Generator
 2. Multiple Choice Assessments
