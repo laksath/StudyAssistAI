@@ -2,3 +2,9 @@ openai
 streamlit
 youtube_transcript_api
 requests
+pymupdf
+pdfplumber
+pillow
+pytesseract
+python-magic
+python-docx
