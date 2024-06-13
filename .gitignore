@@ -10,3 +10,14 @@ __pycache__/
 # Other files or directories to ignore
 .DS_Store
 node_modules/
+
+*.ipynb
+
+
+*.pdf
+
+*.docx
+
+*.png
+*.jpg
+*.jpeg
