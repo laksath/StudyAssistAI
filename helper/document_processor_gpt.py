@@ -148,8 +148,8 @@ def get_file_type(file_path):
     else:
         return 'unknown'
 
-def extract_summarized_pdf(file_path, api_key, task, file_type):
-    file_type = get_file_type(file_type)
+def extract_summarized_pdf(file_path, api_key, task):
+    file_type = get_file_type(file_path)
     if file_type == 'pdf':
       combined_data = extract_pdf_contents(file_path)
     elif file_type == 'image':
