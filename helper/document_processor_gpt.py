@@ -6,6 +6,7 @@ import pytesseract
 import io
 import os
 import magic
+import docx
 
 def extract_text_images(pdf_path):
     doc = fitz.open(pdf_path)
@@ -57,6 +58,40 @@ def prepare_data_for_summary(text, tables, ocr_texts):
 def extract_pdf_contents(pdf_path):
     text, images = extract_text_images(pdf_path)
     tables = extract_tables(pdf_path)
+    ocr_texts = ocr_images(images)
+    combined_data = prepare_data_for_summary(text, tables, ocr_texts)
+    return combined_data
+
+def extract_text(doc):
+    text = []
+    for paragraph in doc.paragraphs:
+        text.append(paragraph.text)
+    return "\n".join(text)
+
+def extract_tables(doc):
+    tables = []
+    for table in doc.tables:
+        table_data = []
+        for row in table.rows:
+            row_data = [cell.text for cell in row.cells]
+            table_data.append(row_data)
+        tables.append(table_data)
+    return tables
+
+def extract_images(doc):
+    images = []
+    for rel in doc.part.rels.values():
+        if "image" in rel.target_ref:
+            image = rel.target_part.blob
+            img = Image.open(io.BytesIO(image))
+            images.append(img)
+    return images
+      
+def extract_doc_contents(doc_path):
+    doc = docx.Document(doc_path)
+    text = extract_text(doc)
+    tables = extract_tables(doc)
+    images = extract_images(doc)
     ocr_texts = ocr_images(images)
     combined_data = prepare_data_for_summary(text, tables, ocr_texts)
     return combined_data
@@ -120,7 +155,7 @@ def extract_summarized_pdf(file_path, api_key, task, file_type):
     elif file_type == 'image':
       combined_data = extract_text_from_image(file_path)
     elif file_type == 'word':
-      combined_data = extract_pdf_contents(file_path)
+      combined_data = extract_doc_contents(file_path)
     
     # Define chunk size based on token limit
     token_limit = 7000
