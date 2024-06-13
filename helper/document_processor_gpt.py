@@ -4,6 +4,8 @@ import pdfplumber
 from PIL import Image
 import pytesseract
 import io
+import os
+import magic
 
 def extract_text_images(pdf_path):
     doc = fitz.open(pdf_path)
@@ -59,6 +61,11 @@ def extract_pdf_contents(pdf_path):
     combined_data = prepare_data_for_summary(text, tables, ocr_texts)
     return combined_data
 
+def extract_text_from_image(image_path):
+    image = Image.open(image_path)
+    text = pytesseract.image_to_string(image)
+    return text
+
 def summary_prompt(text, task):
     if task == 'worksheet':
         return f"Summarize the following text in detail to prepare it for a large worksheet and return only the summarized text:\n\n{text}"
@@ -84,8 +91,36 @@ def generate_summary(api_key, text, task, max_tokens):
 
     return completion.choices[0].message.content
 
-def extract_summarized_pdf(pdf_path, api_key, task):
-    combined_data = extract_pdf_contents(pdf_path)
+def get_file_type(file_path):
+    # Check the file extension first
+    file_extension = os.path.splitext(file_path)[1].lower()
+    if file_extension == '.pdf':
+        return 'pdf'
+    elif file_extension in ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff']:
+        return 'image'
+    elif file_extension in ['.doc', '.docx']:
+        return 'word'
+    
+    # If the extension is unknown, check the MIME type
+    mime = magic.Magic(mime=True)
+    mime_type = mime.from_file(file_path)
+    if mime_type == 'application/pdf':
+        return 'pdf'
+    elif mime_type.startswith('image/'):
+        return 'image'
+    elif mime_type in ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+        return 'word'
+    else:
+        return 'unknown'
+
+def extract_summarized_pdf(file_path, api_key, task, file_type):
+    file_type = get_file_type(file_type)
+    if file_type == 'pdf':
+      combined_data = extract_pdf_contents(file_path)
+    elif file_type == 'image':
+      combined_data = extract_text_from_image(file_path)
+    elif file_type == 'word':
+      combined_data = extract_pdf_contents(file_path)
     
     # Define chunk size based on token limit
     token_limit = 7000
