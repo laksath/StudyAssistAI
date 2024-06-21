@@ -8,39 +8,31 @@ import magic
 import docx
 from datetime import datetime
 from helper.gpt import completion
+from concurrent.futures import ThreadPoolExecutor
 
 def save_uploaded_file(uploaded_file):
-    # Create a unique filename using the original filename and current timestamp
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     filename, file_extension = os.path.splitext(uploaded_file.name)
     unique_filename = f"{filename}_{timestamp}{file_extension}"
     filepath = os.path.join("temp_files", unique_filename)
-
-    # Ensure the temp_files directory exists
     os.makedirs("temp_files", exist_ok=True)
-
-    # Save the file
     with open(filepath, "wb") as f:
         f.write(uploaded_file.getbuffer())
-    
     return filepath
 
 def extract_text_images(pdf_path):
     doc = fitz.open(pdf_path)
     text = ""
     images = []
-
     for page_num in range(len(doc)):
         page = doc.load_page(page_num)
         text += page.get_text()
-
         for img_index, img in enumerate(page.get_images(full=True)):
             xref = img[0]
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
             image = Image.open(io.BytesIO(image_bytes))
             images.append(image)
-
     return text, images
 
 def extract_tables(pdf_path):
@@ -52,9 +44,8 @@ def extract_tables(pdf_path):
 
 def ocr_images(images):
     ocr_texts = []
-    for image in images:
-        ocr_text = pytesseract.image_to_string(image)
-        ocr_texts.append(ocr_text)
+    with ThreadPoolExecutor() as executor:
+        ocr_texts = list(executor.map(pytesseract.image_to_string, images))
     return ocr_texts
 
 def clean_table_data(table):
@@ -80,18 +71,13 @@ def extract_pdf_contents(pdf_path):
     return combined_data
 
 def extract_doc_text(doc):
-    text = []
-    for paragraph in doc.paragraphs:
-        text.append(paragraph.text)
+    text = [paragraph.text for paragraph in doc.paragraphs]
     return "\n".join(text)
 
 def extract_doc_tables(doc):
     tables = []
     for table in doc.tables:
-        table_data = []
-        for row in table.rows:
-            row_data = [cell.text for cell in row.cells]
-            table_data.append(row_data)
+        table_data = [[cell.text for cell in row.cells] for row in table.rows]
         tables.append(table_data)
     return tables
 
@@ -133,7 +119,6 @@ def generate_summary(api_key, text, task, max_tokens):
     return completion(api_key, 'gpt-4o', prompt, max_tokens)
 
 def get_file_type(file_path):
-    # Check the file extension first
     file_extension = os.path.splitext(file_path)[1].lower()
     if file_extension == '.pdf':
         return 'pdf'
@@ -142,7 +127,6 @@ def get_file_type(file_path):
     elif file_extension in ['.doc', '.docx']:
         return 'word'
     
-    # If the extension is unknown, check the MIME type
     mime = magic.Magic(mime=True)
     mime_type = mime.from_file(file_path)
     if mime_type == 'application/pdf':
