@@ -1,4 +1,5 @@
 from openai import OpenAI
+import tiktoken
 
 def completion(api_key, model, prompt, max_tokens=None):
     client = OpenAI(api_key=api_key)
@@ -21,3 +22,8 @@ def completion(api_key, model, prompt, max_tokens=None):
         )
 
     return completion.choices[0].message.content.strip()
+
+def num_tokens_from_string(string: str, encoding_name: str): # 'o200k_base'
+    encoding = tiktoken.get_encoding(encoding_name)
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
