@@ -150,20 +150,6 @@ def extract_summarized_document(file_path, api_key, task):
     elif file_type == 'word':
       combined_data = extract_doc_contents(file_path)
     
-    # Define chunk size based on token limit
-    token_limit = 7000
-    input_token_limit = 3000  # Leave space for prompt and response
-    max_tokens_per_chunk = 2000  # Max tokens per API call response
-    
-    # Split combined_data into chunks within the token limit
-    chunks = [combined_data[i:i + input_token_limit] for i in range(0, len(combined_data), input_token_limit)]
-    
-    summary = ""
-    for chunk in chunks:
-        summary += generate_summary(api_key, chunk, task, max_tokens_per_chunk) + "\n"
-    
-    # If the combined summary is too long, summarize the summary
-    if len(summary) > token_limit:
-        summary = generate_summary(api_key, summary, task, max_tokens_per_chunk)
+    summary = generate_summary(api_key, combined_data, task, None)
     
     return f'\n{summary}'

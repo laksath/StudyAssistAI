@@ -48,10 +48,10 @@ def youtube_video_quiz():
         return full_transcript
 
     def summarize_transcript(api_key, full_transcript):
-        return generate_yt_gpt_response(api_key, generate_summary_prompt(full_transcript), 4000)
+        return generate_yt_gpt_response(api_key, generate_summary_prompt(full_transcript), None)
 
     def generate_mcqs(api_key, full_transcript):
-        return generate_yt_gpt_response(api_key, generate_yt_mcq_prompt(full_transcript), 4000)
+        return generate_yt_gpt_response(api_key, generate_yt_mcq_prompt(full_transcript), None)
 
     # Fetch video data button
     if st.button('Fetch Video Data'):
