@@ -36,7 +36,7 @@ def worksheet_generator():
     if st.button('Generate Worksheet'):
         file_content = extract_summarized_document(filepath, api_key, 'worksheet')
         st.session_state.worksheet_input_attempted = True
-        if api_key and (grade_level or file_content!='') and worksheet_topic_or_text:
+        if api_key and grade_level and (worksheet_topic_or_text or file_content!=''):
             try:
                 st.session_state.worksheet_response = generate_worksheet_response(api_key, grade_level, worksheet_topic_or_text+file_content)
             except Exception as e:

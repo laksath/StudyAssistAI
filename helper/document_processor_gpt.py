@@ -43,9 +43,15 @@ def extract_tables(pdf_path):
     return tables
 
 def ocr_images(images):
-    ocr_texts = []
+    def process_image(image):
+        try:
+            return pytesseract.image_to_string(image)
+        except OSError:
+            return ""
+
     with ThreadPoolExecutor() as executor:
-        ocr_texts = list(executor.map(pytesseract.image_to_string, images))
+        ocr_texts = list(executor.map(process_image, images))
+
     return ocr_texts
 
 def clean_table_data(table):
